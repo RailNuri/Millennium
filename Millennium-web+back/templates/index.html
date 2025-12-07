@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Millennium - Real Estate Marketplace</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            background: #0a0a0a;
+            min-height: 100vh;
+            padding: 0;
+            color: #e0e0e0;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0;
+            background: #1a1a1a;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: #1a1a1a;
+            color: #e0e0e0;
+            padding: 20px 40px;
+            border-bottom: 1px solid #333;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .header h1 {
+            font-size: 1.8em;
+            margin: 0;
+            color: #e0e0e0;
+            font-weight: 600;
+        }
+
+        .header p {
+            font-size: 0.9em;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 0;
+            height: calc(100vh - 100px);
+            min-height: 600px;
+            flex: 1;
+        }
+
+        .sidebar {
+            background: #1a1a1a;
+            padding: 30px;
+            overflow-y: auto;
+            border-right: 1px solid #333;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.3);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #e0e0e0;
+            font-size: 0.9em;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid #333;
+            border-radius: 12px;
+            font-size: 0.95em;
+            transition: all 0.3s;
+            background: #2a2a2a;
+            color: #e0e0e0;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #00BFA5;
+            box-shadow: 0 0 0 3px rgba(0, 191, 165, 0.2);
+            background: #2f2f2f;
+        }
+
+        .requirement-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding: 14px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+            transition: all 0.2s;
+        }
+
+        .requirement-item:hover {
+            background: #f0f0f0;
+            border-color: #00BFA5;
+        }
+
+        .requirement-item label {
+            flex: 1;
+            margin: 0;
+            font-weight: 500;
+            color: #333;
+            font-size: 0.9em;
+        }
+
+        .requirement-item input[type="range"] {
+            flex: 2;
+            margin: 0 15px;
+            height: 6px;
+            border-radius: 3px;
+            background: #e0e0e0;
+            outline: none;
+        }
+
+        .requirement-item input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #00BFA5;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .requirement-item input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #00BFA5;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .requirement-item .value {
+            min-width: 40px;
+            text-align: center;
+            font-weight: 600;
+            color: #00BFA5;
+            font-size: 0.95em;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #00BFA5 0%, #00ACC1 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+            box-shadow: 0 4px 12px rgba(0, 191, 165, 0.4);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 191, 165, 0.5);
+            background: linear-gradient(135deg, #00D4B8 0%, #00BCD4 100%);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .map-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: #0a0a0a;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .legend {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(26, 26, 26, 0.95);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            z-index: 1000;
+            border: 1px solid #333;
+            color: #e0e0e0;
+            backdrop-filter: blur(10px);
+        }
+
+        .legend h4 {
+            color: #e0e0e0;
+            margin-bottom: 12px;
+            font-size: 0.95em;
+            font-weight: 600;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 0.85em;
+        }
+
+        .legend-color {
+            width: 24px;
+            height: 16px;
+            border-radius: 4px;
+            margin-right: 10px;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(26, 26, 26, 0.98);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            z-index: 2000;
+            display: none;
+            border: 1px solid #333;
+            color: #e0e0e0;
+            text-align: center;
+        }
+
+        .spinner {
+            border: 4px solid #333;
+            border-top: 4px solid #00BFA5;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .info-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(26, 26, 26, 0.98);
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            max-width: 320px;
+            display: none;
+            z-index: 1000;
+            border: 1px solid #333;
+            color: #e0e0e0;
+            backdrop-filter: blur(10px);
+        }
+
+        .info-panel h3 {
+            margin-bottom: 12px;
+            color: #e0e0e0;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        .info-panel .score {
+            font-size: 2.2em;
+            font-weight: bold;
+            color: #00BFA5;
+            margin: 12px 0;
+        }
+
+        .mode-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 24px;
+            background: #2a2a2a;
+            padding: 4px;
+            border-radius: 12px;
+        }
+
+        .mode-tab {
+            flex: 1;
+            padding: 12px;
+            background: transparent;
+            color: #999;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95em;
+            transition: all 0.3s;
+        }
+
+        .mode-tab.active {
+            background: #00BFA5 !important;
+            color: white !important;
+            box-shadow: 0 2px 8px rgba(0, 191, 165, 0.4);
+        }
+
+        .mode-tab:not(.active):hover {
+            background: #333;
+            color: #e0e0e0;
+        }
+
+        .house-marker {
+            cursor: pointer;
+        }
+
+        .section-title {
+            color: #e0e0e0;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .info-box {
+            background: #2a2a2a;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #333;
+        }
+
+        .info-box p {
+            color: #999;
+            font-size: 0.9em;
+            margin: 4px 0;
+        }
+
+        .info-box .highlight {
+            color: #00BFA5;
+            font-weight: 600;
+        }
+
+        /* Custom Scrollbar */
+        .sidebar::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: #2a2a2a;
+            border-radius: 4px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: #00BFA5;
+            border-radius: 4px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: #00ACC1;
+        }
+
+        /* Leaflet Popup Styling */
+        .leaflet-popup-content-wrapper {
+            border-radius: 12px !important;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
+            background: #1a1a1a !important;
+            color: #e0e0e0 !important;
+        }
+
+        .leaflet-popup-tip {
+            background: #1a1a1a !important;
+        }
+
+        /* Smooth transitions */
+        * {
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+        /* Input placeholder styling */
+        ::placeholder {
+            color: #666;
+            opacity: 1;
+        }
+
+        /* Focus visible for accessibility */
+        .btn:focus-visible,
+        .mode-tab:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible {
+            outline: 2px solid #00BFA5;
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div>
+                        <h1>Millennium</h1>
+                        <p>YOUR HOME, YOUR OPTIMUM</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="sidebar">
+                <!-- Mode Tabs -->
+                <div class="mode-tabs">
+                    <button id="buyerTab" class="mode-tab active" onclick="switchMode('buyer'); return false;">👤 Buyer</button>
+                    <button id="sellerTab" class="mode-tab" onclick="switchMode('seller'); return false;">🏠 Seller</button>
+                </div>
+
+                <!-- Buyer Mode Form -->
+                <div id="buyerForm" class="mode-form">
+                    <h3 class="section-title">Search for Houses</h3>
+                    
+                    <!-- Hidden requirements inputs -->
+                    <input type="hidden" id="school" value="5">
+                    <input type="hidden" id="hospital" value="5">
+                    <input type="hidden" id="market" value="5">
+                    <input type="hidden" id="cafe" value="5">
+                    <input type="hidden" id="restaurant" value="5">
+                    <input type="hidden" id="park" value="3">
+                    <input type="hidden" id="pharmacy" value="4">
+                    <input type="hidden" id="gym" value="3">
+                    
+                    <div class="form-group">
+                        <label for="minPrice">Min Price (AZN):</label>
+                        <input type="number" id="minPrice" placeholder="e.g., 50000" value="0" min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="maxPrice">Max Price (AZN):</label>
+                        <input type="number" id="maxPrice" placeholder="e.g., 200000" value="">
+                    </div>
+
+                    <button type="button" class="btn" onclick="searchHouses()">🔍 Search Houses</button>
+                </div>
+
+                <!-- Seller Mode Form -->
+                <div id="sellerForm" class="mode-form" style="display: none;">
+                    <h3 class="section-title">List Your House</h3>
+                    
+                    <div class="info-box">
+                        <p style="color: #00BFA5; font-weight: 600; margin-bottom: 8px;">📍 Click on the map to select exact location</p>
+                        <p style="color: #999; font-size: 0.9em; margin: 0;">Selected: <span id="selectedLocation" class="highlight">Not selected</span></p>
+                    </div>
+                    
+                    <form id="sellerHouseForm">
+                        <div class="form-group">
+                            <label for="houseTitle">House Title:</label>
+                            <input type="text" id="houseTitle" placeholder="e.g., Beautiful 3BR Apartment" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="houseAddress">Address:</label>
+                            <input type="text" id="houseAddress" placeholder="e.g., Baku, Azerbaijan" required>
+                        </div>
+
+                        <input type="hidden" id="houseLatitude">
+                        <input type="hidden" id="houseLongitude">
+
+                        <div class="form-group">
+                            <label for="housePrice">Price (AZN):</label>
+                            <input type="number" id="housePrice" placeholder="e.g., 150000" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="houseBedrooms">Bedrooms:</label>
+                            <input type="number" id="houseBedrooms" placeholder="e.g., 3" min="0" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="houseBathrooms">Bathrooms:</label>
+                            <input type="number" id="houseBathrooms" placeholder="e.g., 2" min="0" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="houseArea">Area (m²):</label>
+                            <input type="number" id="houseArea" placeholder="e.g., 120" min="0" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="houseDescription">Description:</label>
+                            <textarea id="houseDescription" placeholder="Describe your house..." rows="3" style="resize: vertical;"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="sellerName">Your Name:</label>
+                            <input type="text" id="sellerName" placeholder="e.g., John Doe" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="sellerPhone">Phone:</label>
+                            <input type="text" id="sellerPhone" placeholder="e.g., +994 50 123 45 67" required>
+                        </div>
+
+                        <button type="submit" class="btn">✅ List House</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="map-container">
+                <div id="map"></div>
+                <div class="legend">
+                    <h4 style="margin-bottom: 10px;">Match Score</h4>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: rgba(0, 255, 0, 0.5);"></div>
+                        <span>Excellent (80-100)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: rgba(144, 238, 144, 0.5);"></div>
+                        <span>Good (60-79)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: rgba(255, 255, 0, 0.5);"></div>
+                        <span>Fair (40-59)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: rgba(255, 165, 0, 0.5);"></div>
+                        <span>Poor (20-39)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: rgba(255, 0, 0, 0.5);"></div>
+                        <span>Very Poor (0-19)</span>
+                    </div>
+                    <hr style="margin: 15px 0; border: none; border-top: 1px solid #444;">
+                    <h4 style="margin-bottom: 10px; margin-top: 10px;">POI Markers</h4>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #4A90E2;"></div>
+                        <span>🏫 Schools</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #E74C3C;"></div>
+                        <span>🏥 Hospitals</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #F39C12;"></div>
+                        <span>🛒 Markets</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #8B4513;"></div>
+                        <span>☕ Cafes</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #E67E22;"></div>
+                        <span>🍽️ Restaurants</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #27AE60;"></div>
+                        <span>🌳 Parks</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #9B59B6;"></div>
+                        <span>🏋️ Gyms</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #3498DB;"></div>
+                        <span>💊 Pharmacy</span>
+                    </div>
+                    <hr style="margin: 15px 0; border: none; border-top: 1px solid #444;">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #FF6B00;"></div>
+                        <span>🚇 Metro Stations</span>
+                    </div>
+                </div>
+
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Analyzing locations...</p>
+                </div>
+
+                <div class="info-panel" id="infoPanel">
+                    <h3>House Details</h3>
+                    <div class="score" id="locationScore">0</div>
+                    <div id="amenitiesList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        let map;
+        let markers = [];
+        let rectangles = [];
+        let poiMarkers = [];
+        let houseMarkers = [];
+        let metroMarkers = [];
+        let selectedLocationMarker = null;
+        let currentMode = 'buyer';
+        
+        // Make switchMode globally accessible
+        window.switchMode = function(mode) {
+            try {
+                currentMode = mode;
+                const buyerTab = document.getElementById('buyerTab');
+                const sellerTab = document.getElementById('sellerTab');
+                const buyerForm = document.getElementById('buyerForm');
+                const sellerForm = document.getElementById('sellerForm');
+                
+                if (!buyerTab || !sellerTab || !buyerForm || !sellerForm) {
+                    console.error('Mode switch elements not found');
+                    return;
+                }
+                
+                // Clear selection marker when switching modes (if map exists)
+                if (map && selectedLocationMarker) {
+                    try {
+                        map.removeLayer(selectedLocationMarker);
+                    } catch (e) {
+                        console.log('Could not remove marker:', e);
+                    }
+                    selectedLocationMarker = null;
+                }
+                
+                const selectedLocationEl = document.getElementById('selectedLocation');
+                const houseLatEl = document.getElementById('houseLatitude');
+                const houseLngEl = document.getElementById('houseLongitude');
+                
+                if (selectedLocationEl) selectedLocationEl.textContent = 'Not selected';
+                if (houseLatEl) houseLatEl.value = '';
+                if (houseLngEl) houseLngEl.value = '';
+                
+                if (mode === 'buyer') {
+                    buyerTab.classList.add('active');
+                    sellerTab.classList.remove('active');
+                    buyerForm.style.display = 'block';
+                    sellerForm.style.display = 'none';
+                } else {
+                    sellerTab.classList.add('active');
+                    buyerTab.classList.remove('active');
+                    sellerForm.style.display = 'block';
+                    buyerForm.style.display = 'none';
+                }
+                
+                console.log('Mode switched to:', mode);
+            } catch (error) {
+                console.error('Error switching mode:', error);
+                alert('Error switching mode. Please refresh the page.');
+            }
+        };
+
+        // POI icon colors
+        const poiColors = {
+            'school': '#4A90E2',
+            'hospital': '#E74C3C',
+            'supermarket': '#F39C12',
+            'market': '#F39C12',
+            'cafe': '#8B4513',
+            'restaurant': '#E67E22',
+            'park': '#27AE60',
+            'gym': '#9B59B6',
+            'pharmacy': '#3498DB'
+        };
+
+        // Initialize map
+        function initMap() {
+            // Default location: Baku, Azerbaijan
+            const defaultLocation = [40.4093, 49.8671];
+            
+            // Azerbaijan bounds
+            const azerbaijanBounds = L.latLngBounds(
+                [38.4, 44.8], // Southwest
+                [41.9, 50.4]  // Northeast
+            );
+            
+            // Create map with Google Maps style tiles - restricted to Azerbaijan
+            map = L.map('map', {
+                center: defaultLocation,
+                zoom: 12,
+                maxBounds: azerbaijanBounds,
+                maxBoundsViscosity: 1.0
+            });
+
+            // Add Satellite imagery tile layer with street labels overlay
+            const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: '© Esri, Maxar, GeoEye, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community',
+                maxZoom: 19,
+                tileSize: 256,
+                zoomOffset: 0
+            });
+            
+            // Add street labels overlay (shows street names)
+            const labelsLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+                attribution: '© Esri',
+                maxZoom: 19,
+                tileSize: 256,
+                zoomOffset: 0,
+                opacity: 0.8
+            });
+            
+            satelliteLayer.addTo(map);
+            labelsLayer.addTo(map);
+            
+            // Listen for map move/zoom to update POIs when map changes (disabled for performance)
+            // Uncomment if you want POIs to update on map move
+            /*
+            let poiUpdateTimeout;
+            map.on('moveend', function() {
+                clearTimeout(poiUpdateTimeout);
+                poiUpdateTimeout = setTimeout(() => {
+                    if (map.getZoom() >= 13) {
+                        const center = map.getCenter();
+                        displayPOIs({lat: center.lat, lng: center.lng});
+                    }
+                }, 1000);
+            });
+            */
+
+            // No range sliders needed
+
+            // Map click handler for seller mode
+            map.on('click', function(e) {
+                if (currentMode === 'seller') {
+                    const lat = e.latlng.lat;
+                    const lng = e.latlng.lng;
+                    
+                    // Update hidden inputs
+                    document.getElementById('houseLatitude').value = lat;
+                    document.getElementById('houseLongitude').value = lng;
+                    
+                    // Update display
+                    document.getElementById('selectedLocation').textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                    
+                    // Remove previous marker
+                    if (selectedLocationMarker) {
+                        map.removeLayer(selectedLocationMarker);
+                    }
+                    
+                    // Add new marker
+                    selectedLocationMarker = L.marker([lat, lng], {
+                        icon: L.icon({
+                            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                            iconSize: [25, 41],
+                            iconAnchor: [12, 41],
+                            popupAnchor: [1, -34],
+                            shadowSize: [41, 41]
+                        })
+                    }).addTo(map);
+                    
+                    selectedLocationMarker.bindPopup('Selected Location').openPopup();
+                    
+                    // Reverse geocode to get address
+                    reverseGeocode(lat, lng);
+                }
+            });
+            
+            // Load all houses on page load (simple icons, no colors)
+            loadAllHouses();
+            
+            // Load metro stations
+            loadMetroStations();
+        }
+        
+        // Reverse geocode to get address from coordinates
+        async function reverseGeocode(lat, lng) {
+            try {
+                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
+                const data = await response.json();
+                
+                if (data && data.address) {
+                    const address = data.display_name || 
+                        `${data.address.road || ''} ${data.address.house_number || ''}, ${data.address.city || data.address.town || data.address.village || 'Azerbaijan'}`.trim();
+                    document.getElementById('houseAddress').value = address;
+                }
+            } catch (error) {
+                console.error('Reverse geocoding error:', error);
+            }
+        }
+        
+        // Load all houses and display on map
+        async function loadAllHouses() {
+            try {
+                const response = await fetch('/api/houses');
+                const data = await response.json();
+                
+                if (data.houses && data.houses.length > 0) {
+                    displayAllHouses(data.houses);
+                }
+            } catch (error) {
+                console.error('Error loading houses:', error);
+            }
+        }
+        
+        // Display all houses on map (simple location icons, no colors)
+        function displayAllHouses(houses) {
+            // Clear previous house markers
+            houseMarkers.forEach(marker => map.removeLayer(marker));
+            houseMarkers = [];
+            
+            houses.forEach(house => {
+                // Simple location icon (no colors)
+                const marker = L.marker([house.latitude, house.longitude], {
+                    icon: L.icon({
+                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                        iconSize: [25, 41],
+                        iconAnchor: [12, 41],
+                        popupAnchor: [1, -34],
+                        shadowSize: [41, 41]
+                    })
+                }).addTo(map);
+                
+                const popupContent = `
+                    <div style="color: #e0e0e0; min-width: 220px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                        <h3 style="margin: 0 0 12px 0; color: #00BFA5; font-size: 1.1em; font-weight: 600;">${house.title}</h3>
+                        <p style="margin: 6px 0; font-size: 0.9em;"><strong style="color: #999;">Price:</strong> <span style="color: #00BFA5; font-weight: 600;">${house.price.toLocaleString()} AZN</span></p>
+                        <p style="margin: 6px 0; font-size: 0.9em;"><strong style="color: #999;">Address:</strong> ${house.address}</p>
+                        <p style="margin: 6px 0; font-size: 0.9em;"><strong style="color: #999;">Bedrooms:</strong> ${house.bedrooms} | <strong style="color: #999;">Bathrooms:</strong> ${house.bathrooms}</p>
+                        <p style="margin: 6px 0; font-size: 0.9em;"><strong style="color: #999;">Area:</strong> ${house.area} m²</p>
+                        <p style="margin: 6px 0; font-size: 0.9em;"><strong style="color: #999;">Seller:</strong> ${house.seller_name}</p>
+                        <p style="margin: 6px 0; font-size: 0.9em;"><strong style="color: #999;">Phone:</strong> ${house.seller_phone}</p>
+                    </div>
+                `;
+                
+                marker.bindPopup(popupContent);
+                houseMarkers.push(marker);
+            });
+            
+            console.log(`Displayed ${houses.length} houses on map`);
+        }
+        
+        // Load and display metro stations
+        async function loadMetroStations() {
+            try {
+                // Clear previous metro markers
+                metroMarkers.forEach(marker => map.removeLayer(marker));
+                metroMarkers = [];
+                
+                const response = await fetch('/api/metro-stations');
+                const data = await response.json();
+                
+                if (data.stations && data.stations.length > 0) {
+                    data.stations.forEach(station => {
+                        const lat = station.geometry.location.lat;
+                        const lng = station.geometry.location.lng;
+                        const name = station.name || 'Metro Station';
+                        
+                        const metroMarker = L.marker([lat, lng], {
+                            icon: L.divIcon({
+                                className: 'metro-marker',
+                                html: `<div style="font-size: 18px; text-align: center; line-height: 1; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));">🚇</div>`,
+                                iconSize: [20, 20],
+                                iconAnchor: [10, 10]
+                            })
+                        }).addTo(map);
+                        
+                        metroMarker.bindPopup(`
+                            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #e0e0e0;">
+                                <b style="color: #FF6B00;">🚇 ${name}</b><br>
+                                <small style="color: #999;">Metro Station</small>
+                            </div>
+                        `);
+                        
+                        metroMarkers.push(metroMarker);
+                    });
+                    
+                    console.log(`Displayed ${data.stations.length} metro stations`);
+                }
+            } catch (error) {
+                console.error('Error loading metro stations:', error);
+            }
+        }
+
+        async function findBestLocations() {
+            const address = document.getElementById('address').value;
+            const loading = document.getElementById('loading');
+            loading.style.display = 'block';
+
+            try {
+                // Geocode address using Nominatim (free, no API key needed)
+                let location = await geocodeAddress(address);
+                
+                // The function always returns a location (Baku as fallback), but check if it's the default
+                if (location.lat === 40.4093 && location.lng === 49.8671 && address.toLowerCase() !== 'baku' && !address.toLowerCase().includes('baku')) {
+                    console.log('Using Baku as fallback location');
+                }
+
+                // Get requirements
+                const requirements = {
+                    school: parseInt(document.getElementById('school').value),
+                    hospital: parseInt(document.getElementById('hospital').value),
+                    market: parseInt(document.getElementById('market').value),
+                    cafe: parseInt(document.getElementById('cafe').value),
+                    restaurant: parseInt(document.getElementById('restaurant').value),
+                    park: parseInt(document.getElementById('park').value),
+                    pharmacy: parseInt(document.getElementById('pharmacy').value),
+                    gym: parseInt(document.getElementById('gym').value)
+                };
+
+                // Call API
+                const response = await fetch('/api/evaluate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        latitude: location.lat,
+                        longitude: location.lng,
+                        requirements: requirements,
+                        grid_size: 3  // Reduced for faster processing
+                    })
+                });
+
+                const data = await response.json();
+                displayResults(data.locations, location);
+                
+                // Fetch and display real POIs after a short delay
+                setTimeout(async () => {
+                    await displayPOIs(location);
+                }, 500);
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        async function displayPOIs(center) {
+            try {
+                console.log('Fetching POIs for center:', center);
+                
+                // Clear previous POI markers
+                poiMarkers.forEach(marker => map.removeLayer(marker));
+                poiMarkers = [];
+
+                // Get map bounds to fetch POIs for the whole visible map
+                const bounds = map.getBounds();
+                const centerPoint = bounds.getCenter();
+                const ne = bounds.getNorthEast();
+                const sw = bounds.getSouthWest();
+                
+                // Calculate radius to cover the whole map (distance from center to corner)
+                const latDiff = ne.lat - sw.lat;
+                const lngDiff = ne.lng - sw.lng;
+                const radiusMeters = Math.max(latDiff, lngDiff) * 111000; // Convert degrees to meters
+                const searchRadius = Math.min(Math.max(radiusMeters, 3000), 5000); // Limit to 3-5km for speed
+                
+                console.log('Fetching POIs with radius:', searchRadius, 'meters');
+                
+                // Fetch all POIs for the whole map area
+                const response = await fetch('/api/all-places', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        latitude: centerPoint.lat,
+                        longitude: centerPoint.lng,
+                        radius: searchRadius
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('POI data received:', data);
+                
+                if (data.error) {
+                    console.error('POI API error:', data.error);
+                    return;
+                }
+                
+                const places = data.places || {};
+
+                let totalPOIs = 0;
+                // Display POIs for each type
+                for (const [placeType, placeList] of Object.entries(places)) {
+                    if (!placeList || placeList.length === 0) {
+                        console.log(`No ${placeType} found`);
+                        continue;
+                    }
+                    
+                    console.log(`Found ${placeList.length} ${placeType}`);
+                    const color = poiColors[placeType] || '#666';
+                    
+                    placeList.forEach(place => {
+                        if (!place || !place.geometry || !place.geometry.location) {
+                            console.warn('Invalid place data:', place);
+                            return;
+                        }
+                        
+                        const lat = place.geometry.location.lat;
+                        const lng = place.geometry.location.lng;
+                        const name = place.name || placeType;
+
+                        // Create icon based on POI type
+                        let iconHtml = '';
+                        let iconSize = [24, 24];
+                        
+                        switch(placeType) {
+                            case 'hospital':
+                                iconHtml = `<div style="font-size: 20px; text-align: center; line-height: 1; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));">🏥</div>`;
+                                break;
+                            case 'school':
+                                iconHtml = `<div style="font-size: 20px; text-align: center; line-height: 1; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));">🏫</div>`;
+                                break;
+                            case 'supermarket':
+                            case 'market':
+                                iconHtml = `<div style="font-size: 20px; text-align: center; line-height: 1; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));">🏪</div>`;
+                                break;
+                            case 'cafe':
+                                iconHtml = `<div style="font-size: 20px; text-align: center; line-height: 1; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));">☕</div>`;
+                                break;
+                            case 'restaurant':
+                                iconHtml = `<div style="font-size: 20px; text-align: center; line-height: 1; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));">🍽️</div>`;
+                                break;
+                            case 'park':
+                                iconHtml = `<div style="font-size: 20px; text-align: center; line-height: 1; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));">🌳</div>`;
+                                break;
+                            case 'gym':
+                                iconHtml = `<div style="font-size: 20px; text-align: center; line-height: 1; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));">💪</div>`;
+                                break;
+                            case 'pharmacy':
+                                iconHtml = `<div style="font-size: 20px; text-align: center; line-height: 1; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));">💊</div>`;
+                                break;
+                            case 'police':
+                                iconHtml = `<div style="font-size: 20px; text-align: center; line-height: 1; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));">🚔</div>`;
+                                break;
+                            default:
+                                iconHtml = `<div style="font-size: 20px; text-align: center; line-height: 1; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));">📍</div>`;
+                        }
+                        
+                        const poiMarker = L.marker([lat, lng], {
+                            icon: L.divIcon({
+                                className: 'poi-marker',
+                                html: iconHtml,
+                                iconSize: iconSize,
+                                iconAnchor: [12, 12]
+                            })
+                        }).addTo(map);
+
+                        // Add popup with POI info
+                        poiMarker.bindPopup(`
+                            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #e0e0e0;">
+                                <b style="color: #00BFA5;">${name}</b><br>
+                                <small style="color: #999;">Type: ${placeType.charAt(0).toUpperCase() + placeType.slice(1)}</small>
+                            </div>
+                        `);
+
+                        poiMarkers.push(poiMarker);
+                        totalPOIs++;
+                    });
+                }
+
+                console.log(`Displayed ${totalPOIs} POI markers on map`);
+                
+                if (totalPOIs === 0) {
+                    console.warn('No POIs were displayed. Check if POIs exist in the area or if there are API issues.');
+                }
+            } catch (error) {
+                console.error('Error fetching POIs:', error);
+                console.error('Error details:', error.stack);
+            }
+        }
+
+        async function geocodeAddress(address) {
+            try {
+                // Try multiple search strategies for better results
+                let searchQueries = [];
+                
+                // Strategy 1: Add Azerbaijan if not present
+                if (!address.toLowerCase().includes('azerbaijan') && !address.toLowerCase().includes('azərbaycan')) {
+                    searchQueries.push(`${address}, Azerbaijan`);
+                    searchQueries.push(`${address}, Azərbaycan`);
+                }
+                
+                // Strategy 2: Original address
+                searchQueries.push(address);
+                
+                // Strategy 3: Common Azerbaijan city names
+                const azerbaijanCities = ['Baku', 'Ganja', 'Sumgait', 'Mingachevir', 'Lankaran', 'Ganja', 'Shirvan', 'Mingəçevir', 'Lənkəran', 'Şirvan'];
+                for (const city of azerbaijanCities) {
+                    if (address.toLowerCase().includes(city.toLowerCase())) {
+                        searchQueries.push(`${city}, Azerbaijan`);
+                        break;
+                    }
+                }
+                
+                // Try each query
+                for (const searchQuery of searchQueries) {
+                    try {
+                        // Try with country code first
+                        let response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=5&countrycodes=az&accept-language=en`);
+                        let data = await response.json();
+                        
+                        // If no results, try without country code restriction
+                        if (!data || data.length === 0) {
+                            response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=5&accept-language=en`);
+                            data = await response.json();
+                        }
+                        
+                        if (data && data.length > 0) {
+                            // Find the first result within Azerbaijan bounds
+                            for (const result of data) {
+                                const lat = parseFloat(result.lat);
+                                const lon = parseFloat(result.lon);
+                                
+                                // Verify it's in Azerbaijan bounds
+                                if (lat >= 38.4 && lat <= 41.9 && lon >= 44.8 && lon <= 50.4) {
+                                    console.log(`Found location: ${result.display_name}`);
+                                    return { lat, lng };
+                                }
+                            }
+                        }
+                    } catch (err) {
+                        console.log(`Query failed for: ${searchQuery}`, err);
+                        continue;
+                    }
+                }
+                
+                // If still no results, return Baku as fallback
+                console.log('No results found for:', address, '- using Baku as default');
+                return { lat: 40.4093, lng: 49.8671 };
+                
+            } catch (error) {
+                console.error('Geocoding error:', error);
+                // Always return Baku as fallback - never return null
+                return { lat: 40.4093, lng: 49.8671 };
+            }
+        }
+
+        function displayResults(locations, center) {
+            // Clear previous markers and circles (but keep POI markers)
+            markers.forEach(marker => map.removeLayer(marker));
+            rectangles.forEach(circle => map.removeLayer(circle));
+            markers = [];
+            rectangles = [];
+
+            // Center map on the search location
+            map.setView([center.lat, center.lng], 14);
+
+            // Create circles and markers for each location
+            locations.forEach(location => {
+                const score = location.score;
+                let color;
+
+                if (score >= 80) {
+                    color = '#00ff00'; // Green
+                } else if (score >= 60) {
+                    color = '#90ee90'; // Light green
+                } else if (score >= 40) {
+                    color = '#ffff00'; // Yellow
+                } else if (score >= 20) {
+                    color = '#ffa500'; // Orange
+                } else {
+                    color = '#ff0000'; // Red
+                }
+
+                // Create circular overlay - smaller radius to avoid overlap
+                const radius = 150; // radius in meters (reduced from 200)
+                
+                const circle = L.circle([location.lat, location.lon], {
+                    radius: radius,
+                    color: color,
+                    fillColor: color,
+                    fillOpacity: 0.4,
+                    weight: 2,
+                    opacity: 0.7
+                }).addTo(map);
+
+                rectangles.push(circle);
+
+                // Create marker with custom icon
+                const marker = L.circleMarker([location.lat, location.lon], {
+                    radius: 8,
+                    fillColor: color,
+                    color: '#fff',
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                }).addTo(map);
+
+                marker.bindPopup(`<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #e0e0e0;"><b style="color: #00BFA5;">Score: ${score.toFixed(1)}</b><br><small style="color: #999;">Click for details</small></div>`);
+
+                // Add click listener
+                marker.on('click', () => {
+                    showLocationInfo(location);
+                });
+
+                circle.on('click', () => {
+                    showLocationInfo(location);
+                });
+
+                markers.push(marker);
+            });
+        }
+
+        function showLocationInfo(location) {
+            const infoPanel = document.getElementById('infoPanel');
+            const scoreElement = document.getElementById('locationScore');
+            const amenitiesList = document.getElementById('amenitiesList');
+
+            scoreElement.textContent = location.score.toFixed(1);
+            
+            let amenitiesHTML = '<div style="margin-top: 15px;"><strong>Amenities:</strong><ul style="margin-top: 10px; padding-left: 20px;">';
+            
+            for (const [key, value] of Object.entries(location.amenities)) {
+                if (value.distance !== null) {
+                    amenitiesHTML += `<li style="margin-bottom: 5px;">${key.charAt(0).toUpperCase() + key.slice(1)}: ${value.distance} km (${value.count} found)</li>`;
+                }
+            }
+            
+            amenitiesHTML += '</ul></div>';
+            amenitiesList.innerHTML = amenitiesHTML;
+            
+            infoPanel.style.display = 'block';
+        }
+
+
+        // Search houses (Buyer mode)
+        async function searchHouses() {
+            const loading = document.getElementById('loading');
+            loading.style.display = 'block';
+            
+            try {
+                // Get requirements from hidden inputs
+                const requirements = {
+                    school: parseInt(document.getElementById('school').value),
+                    hospital: parseInt(document.getElementById('hospital').value),
+                    market: parseInt(document.getElementById('market').value),
+                    cafe: parseInt(document.getElementById('cafe').value),
+                    restaurant: parseInt(document.getElementById('restaurant').value),
+                    park: parseInt(document.getElementById('park').value),
+                    pharmacy: parseInt(document.getElementById('pharmacy').value),
+                    gym: parseInt(document.getElementById('gym').value)
+                };
+                
+                const minPrice = parseFloat(document.getElementById('minPrice').value) || 0;
+                const maxPrice = parseFloat(document.getElementById('maxPrice').value) || Infinity;
+                
+                const response = await fetch('/api/houses/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        min_price: minPrice,
+                        max_price: maxPrice,
+                        requirements: requirements
+                    })
+                });
+                
+                const data = await response.json();
+                displayHouses(data.houses);
+                
+            } catch (error) {
+                console.error('Error searching houses:', error);
+                alert('Error searching houses. Please try again.');
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        // Display houses on map
+        function displayHouses(houses) {
+            // Clear previous markers
+            markers.forEach(marker => map.removeLayer(marker));
+            rectangles.forEach(circle => map.removeLayer(circle));
+            markers = [];
+            rectangles = [];
+            
+            if (houses.length === 0) {
+                alert('No houses found matching your criteria.');
+                return;
+            }
+            
+            // Center map on first house
+            if (houses[0]) {
+                map.setView([houses[0].latitude, houses[0].longitude], 13);
+            }
+            
+            // Display each house
+            houses.forEach(house => {
+                // Get match score (0-100) and assign color
+                const score = house.match_score || 50;
+                let color;
+                
+                if (score >= 80) {
+                    color = '#00ff00'; // Green - excellent
+                } else if (score >= 60) {
+                    color = '#90ee90'; // Light green - good
+                } else if (score >= 40) {
+                    color = '#ffff00'; // Yellow - fair
+                } else if (score >= 20) {
+                    color = '#ffa500'; // Orange - poor
+                } else {
+                    color = '#ff0000'; // Red - very poor
+                }
+                
+                // Create circle around house
+                const circle = L.circle([house.latitude, house.longitude], {
+                    radius: 300,
+                    color: color,
+                    fillColor: color,
+                    fillOpacity: 0.4,
+                    weight: 2,
+                    opacity: 0.7
+                }).addTo(map);
+                
+                rectangles.push(circle);
+                
+                // Create house marker
+                const marker = L.marker([house.latitude, house.longitude], {
+                    icon: L.divIcon({
+                        className: 'house-marker',
+                        html: `<div style="background: ${color}; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
+                        iconSize: [20, 20]
+                    })
+                }).addTo(map);
+                
+                // Create popup with amenities
+                const matchScore = house.match_score || 50;
+                let amenitiesHTML = '';
+                
+                if (house.amenities) {
+                    amenitiesHTML = '<div style="margin-top: 10px; border-top: 1px solid #333; padding-top: 10px;">';
+                    amenitiesHTML += '<strong style="color: #00BFA5; font-size: 0.9em;">Nearby Amenities:</strong><ul style="margin: 8px 0 0 20px; padding: 0; font-size: 0.85em;">';
+                    
+                    // Hospital
+                    if (house.amenities.hospital && house.amenities.hospital.distance !== null) {
+                        amenitiesHTML += `<li style="color: #999; margin: 4px 0;">🏥 Hospital: ${house.amenities.hospital.distance} km${house.amenities.hospital.name ? ' (' + house.amenities.hospital.name + ')' : ''}</li>`;
+                    }
+                    
+                    // Police
+                    if (house.amenities.police && house.amenities.police.distance !== null) {
+                        amenitiesHTML += `<li style="color: #999; margin: 4px 0;">🚔 Police: ${house.amenities.police.distance} km${house.amenities.police.name ? ' (' + house.amenities.police.name + ')' : ''}</li>`;
+                    }
+                    
+                    // School
+                    if (house.amenities.school && house.amenities.school.distance !== null) {
+                        amenitiesHTML += `<li style="color: #999; margin: 4px 0;">🏫 School: ${house.amenities.school.distance} km${house.amenities.school.name ? ' (' + house.amenities.school.name + ')' : ''}</li>`;
+                    }
+                    
+                    // Metro
+                    if (house.amenities.metro && house.amenities.metro.distance !== null) {
+                        amenitiesHTML += `<li style="color: #999; margin: 4px 0;">🚇 Nearest Metro: ${house.amenities.metro.distance} km${house.amenities.metro.name ? ' (' + house.amenities.metro.name + ')' : ''}</li>`;
+                    }
+                    
+                    amenitiesHTML += '</ul></div>';
+                }
+                
+                const popupContent = `
+                    <div style="color: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+                        <h3 style="margin: 0 0 12px 0; color: #00BFA5; font-size: 1.1em; font-weight: 600;">${house.title}</h3>
+                        <p style="margin: 6px 0; font-size: 0.9em;"><strong style="color: #999;">Price:</strong> <span style="color: #00BFA5; font-weight: 600;">${house.price.toLocaleString()} AZN</span></p>
+                        <p style="margin: 6px 0; font-size: 0.9em;"><strong style="color: #999;">Match Score:</strong> <span style="color: ${color}; font-weight: bold;">${matchScore.toFixed(1)}</span></p>
+                        <p style="margin: 6px 0; font-size: 0.9em;"><strong style="color: #999;">Address:</strong> ${house.address}</p>
+                        <p style="margin: 6px 0; font-size: 0.9em;"><strong style="color: #999;">Bedrooms:</strong> ${house.bedrooms} | <strong style="color: #999;">Bathrooms:</strong> ${house.bathrooms}</p>
+                        <p style="margin: 6px 0; font-size: 0.9em;"><strong style="color: #999;">Area:</strong> ${house.area} m²</p>
+                        ${amenitiesHTML}
+                        <p style="margin: 10px 0 6px 0; font-size: 0.9em;"><strong style="color: #999;">Seller:</strong> ${house.seller_name}</p>
+                        <p style="margin: 6px 0; font-size: 0.9em;"><strong style="color: #999;">Phone:</strong> ${house.seller_phone}</p>
+                    </div>
+                `;
+                
+                marker.bindPopup(popupContent);
+                markers.push(marker);
+                
+                // Click handler
+                marker.on('click', () => {
+                    showHouseInfo(house);
+                });
+                circle.on('click', () => {
+                    showHouseInfo(house);
+                });
+            });
+            
+            console.log(`Displayed ${houses.length} houses`);
+        }
+
+        function showHouseInfo(house) {
+            const infoPanel = document.getElementById('infoPanel');
+            const scoreElement = document.getElementById('locationScore');
+            const amenitiesList = document.getElementById('amenitiesList');
+            
+            const matchScore = house.match_score || 50;
+            const qualityScore = house.quality_score || 50;
+            
+            // Show match score (based on requirements) or quality score (based on price)
+            const displayScore = matchScore !== 50 ? matchScore : qualityScore;
+            scoreElement.textContent = displayScore.toFixed(1);
+            scoreElement.style.color = displayScore >= 80 ? '#00ff00' : 
+                                       displayScore >= 60 ? '#90ee90' : 
+                                       displayScore >= 40 ? '#ffff00' : 
+                                       displayScore >= 20 ? '#ffa500' : '#ff0000';
+            
+            let amenitiesHTML = '<div style="margin-top: 15px;"><strong style="color: #e0e0e0;">House Details:</strong><ul style="margin-top: 10px; padding-left: 20px; color: #999;">';
+            amenitiesHTML += `<li><strong>Price:</strong> ${house.price.toLocaleString()} AZN</li>`;
+            amenitiesHTML += `<li><strong>Match Score:</strong> ${displayScore.toFixed(1)}</li>`;
+            
+            // Explain score calculation
+            if (matchScore !== 50) {
+                amenitiesHTML += `<li style="font-size: 0.85em; color: #666; margin-top: 8px;"><em>Score based on your requirements: Schools, Hospitals, Markets, etc. Higher score = better match to your preferences.</em></li>`;
+            } else {
+                amenitiesHTML += `<li style="font-size: 0.85em; color: #666; margin-top: 8px;"><em>Quality Score: Based on price comparison. Lower price = higher score (better value). Score decreases as price increases relative to other houses.</em></li>`;
+            }
+            
+            amenitiesHTML += `<li><strong>Bedrooms:</strong> ${house.bedrooms}</li>`;
+            amenitiesHTML += `<li><strong>Bathrooms:</strong> ${house.bathrooms}</li>`;
+            amenitiesHTML += `<li><strong>Area:</strong> ${house.area} m²</li>`;
+            amenitiesHTML += `<li><strong>Address:</strong> ${house.address}</li>`;
+            amenitiesHTML += '</ul>';
+            
+            // Add amenities list
+            if (house.amenities) {
+                amenitiesHTML += '<strong style="color: #e0e0e0; margin-top: 15px; display: block;">Nearby Amenities:</strong><ul style="margin-top: 10px; padding-left: 20px; color: #999;">';
+                
+                // Hospital
+                if (house.amenities.hospital && house.amenities.hospital.distance !== null) {
+                    amenitiesHTML += `<li>🏥 Hospital: ${house.amenities.hospital.distance} km${house.amenities.hospital.name ? ' (' + house.amenities.hospital.name + ')' : ''}</li>`;
+                }
+                
+                // Police
+                if (house.amenities.police && house.amenities.police.distance !== null) {
+                    amenitiesHTML += `<li>🚔 Police: ${house.amenities.police.distance} km${house.amenities.police.name ? ' (' + house.amenities.police.name + ')' : ''}</li>`;
+                }
+                
+                // School
+                if (house.amenities.school && house.amenities.school.distance !== null) {
+                    amenitiesHTML += `<li>🏫 School: ${house.amenities.school.distance} km${house.amenities.school.name ? ' (' + house.amenities.school.name + ')' : ''}</li>`;
+                }
+                
+                // Metro
+                if (house.amenities.metro && house.amenities.metro.distance !== null) {
+                    amenitiesHTML += `<li>🚇 Nearest Metro: ${house.amenities.metro.distance} km${house.amenities.metro.name ? ' (' + house.amenities.metro.name + ')' : ''}</li>`;
+                }
+                
+                amenitiesHTML += '</ul>';
+            }
+            
+            amenitiesHTML += '<ul style="margin-top: 10px; padding-left: 20px; color: #999;">';
+            amenitiesHTML += `<li><strong>Seller:</strong> ${house.seller_name}</li>`;
+            amenitiesHTML += `<li><strong>Phone:</strong> ${house.seller_phone}</li>`;
+            amenitiesHTML += '</ul></div>';
+            amenitiesList.innerHTML = amenitiesHTML;
+            
+            infoPanel.style.display = 'block';
+        }
+
+        // Add house (Seller mode)
+        document.getElementById('sellerHouseForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const lat = document.getElementById('houseLatitude').value;
+            const lng = document.getElementById('houseLongitude').value;
+            const address = document.getElementById('houseAddress').value;
+            
+            // Check if location is selected
+            if (!lat || !lng) {
+                alert('Please click on the map to select the exact location of your house!');
+                return;
+            }
+            
+            const loading = document.getElementById('loading');
+            loading.style.display = 'block';
+            
+            try {
+                // Prepare house data
+                const houseData = {
+                    title: document.getElementById('houseTitle').value,
+                    address: address || 'Address not specified',
+                    latitude: parseFloat(lat),
+                    longitude: parseFloat(lng),
+                    price: parseFloat(document.getElementById('housePrice').value),
+                    description: document.getElementById('houseDescription').value,
+                    bedrooms: parseInt(document.getElementById('houseBedrooms').value),
+                    bathrooms: parseInt(document.getElementById('houseBathrooms').value),
+                    area: parseFloat(document.getElementById('houseArea').value),
+                    seller_name: document.getElementById('sellerName').value,
+                    seller_phone: document.getElementById('sellerPhone').value
+                };
+                
+                // Submit to API
+                const response = await fetch('/api/houses', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(houseData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert('House listed successfully!');
+                    document.getElementById('sellerHouseForm').reset();
+                    document.getElementById('selectedLocation').textContent = 'Not selected';
+                    
+                    // Remove selection marker
+                    if (selectedLocationMarker) {
+                        map.removeLayer(selectedLocationMarker);
+                        selectedLocationMarker = null;
+                    }
+                    
+                    // Reload all houses to show the new one
+                    await loadAllHouses();
+                    
+                    // Center map on new house
+                    map.setView([houseData.latitude, houseData.longitude], 15);
+                } else {
+                    alert('Error: ' + (data.error || 'Failed to list house'));
+                }
+                
+            } catch (error) {
+                console.error('Error adding house:', error);
+                alert('Error adding house. Please try again.');
+            } finally {
+                loading.style.display = 'none';
+            }
+        });
+
+        // Initialize map when page loads
+        window.addEventListener('DOMContentLoaded', initMap);
+    </script>
+</body>
+</html>
